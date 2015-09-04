@@ -23,6 +23,8 @@ namespace RRISD_HAC_Access
             }
             return ret;
         }
+
+        //doesn't take weighted average into consideration! :(
         public static double getListAverage(List<Assignment> assignments)
         {
             double a = 0;
@@ -35,7 +37,7 @@ namespace RRISD_HAC_Access
                     b++;
                 }
             }
-            return (a / (double)b) * 100;
+            return (a / (double)b);
         }
         public static List<Assignment> getUpcomingAssignments(List<Assignment> assignments, TimeSpan timeSpan, bool includeAlreadyGradedAssignments)
         {

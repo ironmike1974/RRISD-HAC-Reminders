@@ -18,20 +18,23 @@ namespace RRISD_HAC_Access
             CookieContainer container;
             HttpWebResponse response = hac.login("omit", "omit", out container);
             List<Student> students = hac.getStudents(container, response.ResponseUri);
-            Tuple<String, String> emailInfo = new Tuple<String, String>("omit","omit");
-            foreach (Student student in students)
+            Tuple<String, String> emailInfo = new Tuple<String, String>("omit", "omit");
+            hac.changeStudent("124880", container, response.ResponseUri);
+            List<Assignment> assignments = hac.getAssignments(container, response.ResponseUri);
+            Dictionary<String, List<Assignment>> courses = AssignmentUtils.organizeAssignments(assignments);
+            foreach (KeyValuePair<String,List<Assignment>> pair in courses)
             {
-                hac.changeStudent(student.id, container, response.ResponseUri);
-                List<Assignment> assignments = hac.getAssignments(container, response.ResponseUri);
-                SMS sms = new SMS();
-                foreach (Assignment assignment in assignments)
+                Console.WriteLine(pair.Key+"\n");
+                double avg = 0;
+                foreach (Assignment assignment in pair.Value)
                 {
-                    if ((assignment.points!=-1)&& (assignment.points < 100))
-                    {
-                        sms.sendSMS("omit",student.name+" got a " + assignment.points + " on his assignment " + assignment.classwork + " which was due on " + assignment.dueDate + " and " + (assignment.canBeDropped ? "can" : "cannot") + " be dropped!", SMSCarrier.ATT, emailInfo);
-                    }
+                    avg = assignment.courseAverage; //eww
+                    Console.WriteLine(assignment);
                 }
+                Console.WriteLine("CLASS AVERAGE: " + avg);
+                Console.WriteLine();
             }
+            Console.WriteLine("DONE");
             Console.ReadKey();
         }
     }
