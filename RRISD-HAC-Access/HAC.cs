@@ -33,7 +33,7 @@ namespace RRISD_HAC_Access
                 request.Method = "POST";
                 request.ServicePoint.Expect100Continue = false;
 
-                string body = @"Database=10&LogOnDetails.UserName="+username+"&LogOnDetails.Password="+password;
+                string body = @"Database=10&LogOnDetails.UserName=" + username + "&LogOnDetails.Password=" + password;
                 byte[] postBytes = System.Text.Encoding.UTF8.GetBytes(body);
                 request.ContentLength = postBytes.Length;
                 Stream stream = request.GetRequestStream();
@@ -41,7 +41,8 @@ namespace RRISD_HAC_Access
                 stream.Close();
 
                 return (HttpWebResponse)request.GetResponse();
-            }catch
+            }
+            catch
             {
                 return null;
             }
@@ -146,6 +147,94 @@ namespace RRISD_HAC_Access
                 return null;
             }
         }
+        public List<Student> getStudents(CookieContainer cookies, Uri requestUri)
+        {
+            try
+            {
+                String s = String.Empty;
+                foreach (Cookie cookie in cookies.GetCookies(requestUri))
+                {
+                    s += (cookie.Name + "=" + cookie.Value + "; ");
+                }
+                List<Student> ret = new List<Student>();
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://accesscenter.roundrockisd.org/HomeAccess/Frame/StudentPicker?_=1441334105309");
+
+                request.KeepAlive = true;
+                request.Accept = "*/*";
+                request.Headers.Add("X-Requested-With", @"XMLHttpRequest");
+                request.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36";
+                request.Referer = "https://accesscenter.roundrockisd.org/HomeAccess/Classes/Classwork";
+                request.Headers.Set(HttpRequestHeader.AcceptEncoding, "gzip, deflate, sdch");
+                request.Headers.Set(HttpRequestHeader.AcceptLanguage, "en-US,en;q=0.8");
+                request.Headers.Set(HttpRequestHeader.Cookie, s);
+
+                String response = readResponse((HttpWebResponse)request.GetResponse());
+                while (response.IndexOf("sg-student-picker-row") != -1)
+                {
+                    int a = response.IndexOf("value") + 7; //magic number returns
+                    String id = response.Substring(a, response.IndexOf("\"", a) - a);
+                    int b = response.IndexOf("sg-picker-student-name") + 24;
+                    String name = response.Substring(b, response.IndexOf("<", b) - b); //hope the student's name doesn't have an < in it :o
+                    int c = response.IndexOf("sg-picker-grade") + 13;
+                    String grade = response.Substring(c, response.IndexOf("<", c) - c);
+                    grade = grade.Substring(grade.IndexOf(" ") + 1);
+                    response = response.Substring(c);
+                    ret.Add(new Student
+                    {
+                        id = id,
+                        assignments = null,
+                        name = name,
+                        grade = grade
+                    });
+                }
+                return ret;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        public bool changeStudent(String studentId, CookieContainer cookies, Uri requestUri)
+        {
+            try
+            {
+                String s = String.Empty;
+                foreach (Cookie cookie in cookies.GetCookies(requestUri))
+                {
+                    s += (cookie.Name + "=" + cookie.Value + "; ");
+                }
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://accesscenter.roundrockisd.org/HomeAccess/Frame/StudentPicker");
+
+                request.KeepAlive = true;
+                request.Headers.Set(HttpRequestHeader.CacheControl, "max-age=0");
+                request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+                request.Headers.Add("Origin", @"https://accesscenter.roundrockisd.org");
+                request.Headers.Add("Upgrade-Insecure-Requests", @"1");
+                request.UserAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36";
+                request.ContentType = "application/x-www-form-urlencoded";
+                request.Referer = "https://accesscenter.roundrockisd.org/HomeAccess/Classes/Classwork";
+                request.Headers.Set(HttpRequestHeader.AcceptEncoding, "gzip, deflate");
+                request.Headers.Set(HttpRequestHeader.AcceptLanguage, "en-US,en;q=0.8");
+                request.Headers.Set(HttpRequestHeader.Cookie, s);
+
+                request.Method = "POST";
+                request.ServicePoint.Expect100Continue = false;
+
+                string body = @"studentId=" + studentId + "&url=%2FHomeAccess%2FClasses%2FClasswork&url=%2FHomeAccess%2FClasses%2FClasswork";
+                byte[] postBytes = System.Text.Encoding.UTF8.GetBytes(body);
+                request.ContentLength = postBytes.Length;
+                Stream stream = request.GetRequestStream();
+                stream.Write(postBytes, 0, postBytes.Length);
+                stream.Close();
+
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         private string readResponse(HttpWebResponse response)
         {
             using (Stream responseStream = response.GetResponseStream())
@@ -166,6 +255,13 @@ namespace RRISD_HAC_Access
                 }
             }
         }
+    }
+    class Student
+    {
+        public String id { get; set; }
+        public List<Assignment> assignments { get; set; }
+        public String name { get; set; }
+        public String grade { get; set; }
     }
     class Assignment
     {
