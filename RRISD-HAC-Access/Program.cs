@@ -19,7 +19,7 @@ namespace RRISD_HAC_Access
             HttpWebResponse response = hac.login("omit", "omit", out container);
             List<Student> students = hac.getStudents(container, response.ResponseUri);
             Tuple<String, String> emailInfo = new Tuple<String, String>("omit", "omit");
-            hac.changeStudent("124880", container, response.ResponseUri);
+            hac.changeStudent("omit", container, response.ResponseUri);
             List<Assignment> assignments = hac.getAssignments(container, response.ResponseUri);
             Dictionary<String, List<Assignment>> courses = AssignmentUtils.organizeAssignments(assignments);
             foreach (KeyValuePair<String,List<Assignment>> pair in courses)
