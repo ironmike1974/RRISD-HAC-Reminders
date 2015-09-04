@@ -87,6 +87,8 @@ namespace RRISD_HAC_Access
                     String category = s.Substring(e, s.IndexOf("\n", e) - e).Trim();
                     e = s.IndexOf("Due Date:") + 9;
                     DateTime date = DateTime.Parse(s.Substring(e, s.IndexOf("\n", e) - e).Trim());
+                    date.AddHours(16); //set time due to 4:10 PM
+                    date.AddMinutes(10);
                     e = s.IndexOf("Max Points:") + 11;
                     double maxPoints = double.Parse(s.Substring(e, s.IndexOf("\n", e) - e).Trim());
                     e = s.IndexOf("Can Be Dropped:") + 16;
@@ -275,5 +277,14 @@ namespace RRISD_HAC_Access
         public bool canBeDropped { get; set; }
         public bool extraCredit { get; set; }
         public bool hasAttachment { get; set; }
+    }
+    class User
+    {
+        public String name { get; set; }
+        public String phoneNumber { get; set; }
+        public String username { get; set; }
+        public String password { get; set; }
+        public SMSCarrier carrier { get; set; }
+        public List<Student> students { get; set; }
     }
 }

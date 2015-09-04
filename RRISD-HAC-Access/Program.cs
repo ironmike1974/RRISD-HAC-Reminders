@@ -16,9 +16,9 @@ namespace RRISD_HAC_Access
             //HACSMSGateway
             HAC hac = new HAC();
             CookieContainer container;
-            HttpWebResponse response = hac.login("omitted", "omitted", out container);
+            HttpWebResponse response = hac.login("omit", "omit", out container);
             List<Student> students = hac.getStudents(container, response.ResponseUri);
-            Tuple<String, String> emailInfo = new Tuple<String, String>("omitted", "omitted");
+            Tuple<String, String> emailInfo = new Tuple<String, String>("omit","omit");
             foreach (Student student in students)
             {
                 hac.changeStudent(student.id, container, response.ResponseUri);
@@ -28,7 +28,7 @@ namespace RRISD_HAC_Access
                 {
                     if ((assignment.points!=-1)&& (assignment.points < 100))
                     {
-                        sms.sendSMS("omitted",student.name+" got a " + assignment.points + " on his assignment " + assignment.classwork + " which was due on " + assignment.dueDate + " and " + (assignment.canBeDropped ? "can" : "cannot") + " be dropped!", SMSCarrier.ATT,credentials);
+                        sms.sendSMS("omit",student.name+" got a " + assignment.points + " on his assignment " + assignment.classwork + " which was due on " + assignment.dueDate + " and " + (assignment.canBeDropped ? "can" : "cannot") + " be dropped!", SMSCarrier.ATT, emailInfo);
                     }
                 }
             }
