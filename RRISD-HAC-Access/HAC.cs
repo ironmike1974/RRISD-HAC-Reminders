@@ -59,12 +59,11 @@ namespace RRISD_HAC_Access
             String course = data.Substring(x, y - x).Trim();
             int z = data.IndexOf("AVG ", x) + 4;
             double average = double.Parse(data.Substring(z, data.IndexOf("%", z) - z).Trim());
-            Console.WriteLine(average);
             data = data.Substring(y);
             while (data.IndexOf("title=\"Title") != -1)
             {
                 int a = data.IndexOf("title=\"Title");
-                x = data.IndexOf(">", data.IndexOf("<a class=\"sg-header-heading\"")) + 1;
+                x = data.IndexOf(">", Math.Max(0,data.IndexOf("<a class=\"sg-header-heading\""))) + 1;
                 if (a < x)
                 {
                     int b = data.IndexOf("\"", a + "title=".Length + 1);
@@ -79,7 +78,11 @@ namespace RRISD_HAC_Access
                     double points = -1;
                     if (temp.Length > 0)
                     {
-                        points = double.Parse(temp);
+                        if(temp.Contains("M")) {
+                            points = -1;
+                        } else {
+                            points = double.Parse(temp);
+                        }
                     }
                     //its about to get ugly
                     int e = s.IndexOf("Title:") + 6;
@@ -118,11 +121,15 @@ namespace RRISD_HAC_Access
                 }
                 else
                 {
-                    x = data.IndexOf(">", data.IndexOf("<a class=\"sg-header-heading\"")) + 1;
+                    x = data.IndexOf(">",Math.Max(0,data.IndexOf("<a class=\"sg-header-heading\""))) + 1;
                     y = data.IndexOf("</a>", x);
                     course = data.Substring(x, y - x).Trim();
-                    z = data.IndexOf("AVG ", x) + 4;
-                    average = double.Parse(data.Substring(z, data.IndexOf("%", z) - z).Trim());
+                    z = data.IndexOf("AVG ",y) + 4;
+                    try {
+                        average = double.Parse(data.Substring(z,data.IndexOf("%",z) - z).Trim());
+                    } catch {
+                        return ret;
+                    }
                     data = data.Substring(y);
                 }
             }

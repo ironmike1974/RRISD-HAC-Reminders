@@ -60,5 +60,14 @@ namespace RRISD_HAC_Access
                 return false;
             }
         }
+        public void getMessages(Tuple<String,String> credentials) {
+            using(AE.Net.Mail.ImapClient ic = new AE.Net.Mail.ImapClient("imap.gmail.com",credentials.Item1,credentials.Item2,AE.Net.Mail.AuthMethods.Login,993,true)) {
+                ic.SelectMailbox("INBOX");
+                AE.Net.Mail.MailMessage[] mm = ic.GetMessages(0,10);
+                foreach(AE.Net.Mail.MailMessage message in mm) {
+                    Console.WriteLine(message.Body);
+                }
+            }
+        }
     }
 }
