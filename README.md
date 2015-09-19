@@ -4,7 +4,12 @@
 <li>Access <a href="https://accesscenter.roundrockisd.org/HomeAccess/Account/LogOn">Home Access Center for RRISD</a> via a simple C# library</li>
 <li>Monitor grades for multiple students under one account</li>
 <li>Easy organization of upcoming assignments</li>
-
+</ul>
+<h1>Possible uses</h1>
+<ul>
+<li>Notify users a day before an assignment is due (or sooner for tests) via SMS</li>
+<li>Notify users of missing grades with due dates from the past.</li>
+</ul>
 <h1><b>Examples</b></h1>
 
 <h3>Login and fetch all grades for the default student</h3>
