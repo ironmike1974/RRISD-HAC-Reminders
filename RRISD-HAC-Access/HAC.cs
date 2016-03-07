@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using System.Text.RegularExpressions;
+using System.Web;
 
 namespace RRISD_HAC_Access
 {
@@ -127,10 +128,10 @@ namespace RRISD_HAC_Access
                     //you can open your eyes now
                     ret.Add(new Assignment
                     {
-                        title = title,
+                        title = HttpUtility.HtmlDecode(title),
                         course = trimmer.Replace(course, " "),
-                        classwork = classwork,
-                        category = category,
+                        classwork = HttpUtility.HtmlDecode(classwork),
+                        category = HttpUtility.HtmlDecode(category),
                         dueDate = date,
                         maxPoints = maxPoints,
                         points = points,
