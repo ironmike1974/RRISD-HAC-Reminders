@@ -7,10 +7,11 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using System.Text.RegularExpressions;
 
 namespace RRISD_HAC_Access
 {
-    class HAC
+    public class HAC
     {
         public HttpWebResponse login(String username, String password, out CookieContainer container)
         {
@@ -49,6 +50,7 @@ namespace RRISD_HAC_Access
         }
         public List<Assignment> getAssignments(CookieContainer cookies, Uri requestUri)
         {
+            Regex trimmer = new Regex(@"\s\s+", RegexOptions.Compiled);
             String data = getRawGradeData(cookies, requestUri);
             List<String> raw = new List<String>();
             List<Assignment> ret = new List<Assignment>();
@@ -59,13 +61,18 @@ namespace RRISD_HAC_Access
             String course = data.Substring(x, y - x).Trim();
             int z = data.IndexOf("AVG ", x) + 4;
             double average = double.Parse(data.Substring(z, data.IndexOf("%", z) - z).Trim());
-            Console.WriteLine(average);
             data = data.Substring(y);
+            bool flag = false;
             while (data.IndexOf("title=\"Title") != -1)
             {
                 int a = data.IndexOf("title=\"Title");
-                x = data.IndexOf(">", data.IndexOf("<a class=\"sg-header-heading\"")) + 1;
-                if (a < x)
+                int index = data.IndexOf("<a class=\"sg-header-heading\"");
+                if ((index == -1) && (!flag)) break;
+                if (index != -1)
+                {
+                    x = data.IndexOf(">", index) + 1;
+                }
+                if (((a < x) || (flag && index == -1)))
                 {
                     int b = data.IndexOf("\"", a + "title=".Length + 1);
                     String s = data.Substring(a + "title=".Length + 1, b - a - 7); //7 is the magic number
@@ -76,10 +83,27 @@ namespace RRISD_HAC_Access
                     int d = data.IndexOf("</td>", c + 5); //as is 5
 
                     String temp = data.Substring(c, d - c).Trim();
+                    AssignmentStatus status = AssignmentStatus.Upcoming;
                     double points = -1;
-                    if (temp.Length > 0)
+                    if (temp.Equals("M"))
                     {
-                        points = double.Parse(temp);
+                        status = AssignmentStatus.Missing;
+                    }
+                    else if (temp.Equals("I"))
+                    {
+                        status = AssignmentStatus.Incomplete;
+                    }
+                    else if (temp.Equals("EXC"))
+                    {
+                        status = AssignmentStatus.Excused;
+                    }
+                    else if (double.TryParse(temp, out points))
+                    {
+                        status = AssignmentStatus.Complete;
+                    }
+                    else
+                    {
+                        points = -1;
                     }
                     //its about to get ugly
                     int e = s.IndexOf("Title:") + 6;
@@ -104,7 +128,7 @@ namespace RRISD_HAC_Access
                     ret.Add(new Assignment
                     {
                         title = title,
-                        course = course,
+                        course = trimmer.Replace(course, " "),
                         classwork = classwork,
                         category = category,
                         dueDate = date,
@@ -113,7 +137,8 @@ namespace RRISD_HAC_Access
                         courseAverage = average,
                         canBeDropped = droppable,
                         extraCredit = extraCredit,
-                        hasAttachment = attachments
+                        hasAttachment = attachments,
+                        status = status
                     });
                 }
                 else
@@ -124,8 +149,10 @@ namespace RRISD_HAC_Access
                     z = data.IndexOf("AVG ", x) + 4;
                     average = double.Parse(data.Substring(z, data.IndexOf("%", z) - z).Trim());
                     data = data.Substring(y);
+                    flag = true;
                 }
             }
+            Console.WriteLine(data.Substring(0, 1024));
             //end horrid part
             return ret;
         }
@@ -243,6 +270,10 @@ namespace RRISD_HAC_Access
                 return false;
             }
         }
+        public bool isValidLogin(HttpWebResponse response)
+        {
+            return !readResponse(response).Contains("You have entered an invalid username or password");
+        }
         private string readResponse(HttpWebResponse response)
         {
             using (Stream responseStream = response.GetResponseStream())
@@ -264,20 +295,29 @@ namespace RRISD_HAC_Access
             }
         }
     }
-    class Student
+    public enum AssignmentStatus
+    {
+        Upcoming,
+        Complete,
+        Incomplete,
+        Missing,
+        Excused
+    }
+    public class Student
     {
         public String id { get; set; }
         public List<Assignment> assignments { get; set; }
         public String name { get; set; }
         public String grade { get; set; }
     }
-    class Assignment
+    public class Assignment
     {
         public String title { get; set; }
         public String course { get; set; }
         public String classwork { get; set; }
         public String category { get; set; }
         public DateTime dueDate { get; set; }
+        public AssignmentStatus status { get; set; }
         public double maxPoints { get; set; }
         public double points { get; set; }
         public double courseAverage { get; set; } //meh, I prefer this to having a Course object with the classes, as the organizeAssignment function does just that
@@ -286,10 +326,29 @@ namespace RRISD_HAC_Access
         public bool hasAttachment { get; set; }
         public override String ToString()
         {
-            return course + " : " + classwork + " : " + ((points == -1) ? "Due " + dueDate.ToShortDateString() : points + "/" + maxPoints);
+            return course + " : " + classwork + " : " + status + " : " + ((points == -1) ? "Due " + dueDate.ToShortDateString() : points + "/" + maxPoints);
+        }
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Assignment))
+                return false;
+            Assignment assignment = (Assignment)obj;
+            return (
+                (title.Equals(assignment.title)) &&
+                (course.Equals(assignment.course)) &&
+                (category.Equals(assignment.category)) &&
+                (dueDate.Equals(assignment.dueDate)) &&
+                (status.Equals(assignment.status)) &&
+                (points.Equals(assignment.points)) &&
+                (canBeDropped.Equals(assignment.canBeDropped))
+           );
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
-    class User
+    public class User
     {
         public String name { get; set; }
         public String phoneNumber { get; set; }
@@ -297,5 +356,12 @@ namespace RRISD_HAC_Access
         public String password { get; set; } //eep
         public SMSCarrier carrier { get; set; }
         public List<Student> students { get; set; }
+    }
+    public class UpdatedAssignment
+    {
+        public Assignment oldAssignment { get; set; }
+        public Assignment newAssignment { get; set; }
+        public String reason { get; set; }
+        public bool positive { get; set; }
     }
 }

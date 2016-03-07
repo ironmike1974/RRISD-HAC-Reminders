@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace RRISD_HAC_Access
 {
-    class AssignmentUtils
+    public class AssignmentUtils
     {
         public static Dictionary<String, List<Assignment>> organizeAssignments(List<Assignment> assignments)
         {
@@ -53,7 +55,7 @@ namespace RRISD_HAC_Access
             }
             return ret;
         }
-        public static List<Assignment> getGradesAboveValue(List<Assignment> assignments, double value)
+        public static List<Assignment> getAssignmentsAboveValue(List<Assignment> assignments, double value)
         {
             List<Assignment> ret = new List<Assignment>();
             foreach (Assignment assignment in assignments)
@@ -65,7 +67,7 @@ namespace RRISD_HAC_Access
             }
             return ret;
         }
-        public static List<Assignment> getGradesBelowValue(List<Assignment> assignments, double value)
+        public static List<Assignment> getAssignmentsBelowValue(List<Assignment> assignments, double value)
         {
             List<Assignment> ret = new List<Assignment>();
             foreach (Assignment assignment in assignments)
@@ -103,9 +105,103 @@ namespace RRISD_HAC_Access
             }
             return ret;
         }
-        public static List<Assignment> getGradesUnderValueAndDroppable(List<Assignment> assignments, double value)
+        public static List<Assignment> getAssignmentsUnderValueAndDroppable(List<Assignment> assignments, double value)
         {
-            return getDroppableAssignments(getGradesBelowValue(assignments, value), true);
+            return getDroppableAssignments(getAssignmentsBelowValue(assignments, value), true);
+        }
+        public static List<Assignment> getAssignmentsWithStatus(List<Assignment> assignments, AssignmentStatus status)
+        {
+            List<Assignment> ret = new List<Assignment>();
+            foreach (Assignment assignment in assignments)
+            {
+                if (assignment.status == status)
+                {
+                    ret.Add(assignment);
+                }
+            }
+            return ret;
+        }
+        public static UpdatedAssignment getReasonForAssignmentUpdate(UpdatedAssignment assignment)
+        {
+            Assignment oldAssignment = assignment.oldAssignment;
+            Assignment newAssignment = assignment.newAssignment;
+            PropertyInfo[] properties = oldAssignment.GetType().GetProperties();
+            foreach (PropertyInfo property in properties)
+            {
+                Type type = property.GetType();
+                object oldValue = property.GetValue(oldAssignment);
+                object newValue = property.GetValue(newAssignment);
+                if (!oldValue.Equals(newValue))
+                {
+                    switch (property.Name)
+                    {
+                        case "points":
+                            if ((oldAssignment.points < newAssignment.points) && (newAssignment.status == AssignmentStatus.Upcoming))
+                            {
+                                assignment.reason = " received a grade of " + newAssignment.points + "% on this assignment.";
+                                if (newAssignment.points < 70)
+                                {
+                                    assignment.positive = false;
+                                }
+                                else
+                                {
+                                    assignment.positive = true;
+                                }
+                            }
+                            else if (oldAssignment.points > newAssignment.points)
+                            {
+                                assignment.reason = " had a grade drop from a " + oldAssignment.points + "% to a " + newAssignment.points + "%. They now have a " + newAssignment.courseAverage + "% in " + newAssignment.course + ".";
+                                assignment.positive = false;
+                            }
+                            else if (newAssignment.points > oldAssignment.points)
+                            {
+                                assignment.reason = " has risen a grade from a " + oldAssignment.points + "% to a " + newAssignment.points + "%. They now have a " + newAssignment.courseAverage + " % in " + newAssignment.course + ".";
+                                assignment.positive = true;
+                            }
+                            break;
+                        case "canBeDropped":
+                            if ((newAssignment.canBeDropped) && (!oldAssignment.canBeDropped))
+                            {
+                                assignment.reason = " now has the opportunity to drop this assignment (Current grade: " + newAssignment.points + "%).";
+                                assignment.positive = true;
+                            }
+                            else if ((oldAssignment.canBeDropped) && (!newAssignment.canBeDropped))
+                            {
+                                assignment.reason = " can no longer drop this assigment!";
+                                assignment.positive = false;
+                            }
+                            break;
+                        case "status":
+                            if ((newAssignment.status == AssignmentStatus.Missing) && (oldAssignment.status != AssignmentStatus.Missing))
+                            {
+                                assignment.reason = " has not turned in this assignment, and is currently marked as missing!";
+                                assignment.positive = false;
+                            }
+                            else if ((newAssignment.status == AssignmentStatus.Incomplete) && (oldAssignment.status != AssignmentStatus.Incomplete))
+                            {
+                                assignment.reason = " has an incomplete assignment!";
+                                assignment.positive = false;
+                            }
+                            else if ((newAssignment.status == AssignmentStatus.Complete) && (oldAssignment.status != AssignmentStatus.Complete))
+                            {
+                                assignment.reason = " has turned in this assignment!";
+                                assignment.positive = true;
+                            }
+                            break;
+                        case "dueDate":
+                            if (newAssignment.dueDate > oldAssignment.dueDate)
+                            {
+                                assignment.reason = " has had this assignment's due date pushed back! (From " + oldAssignment.dueDate.ToShortDateString() + " to " + newAssignment.dueDate.ToShortDateString() + ")";
+                            }
+                            else if (newAssignment.dueDate < oldAssignment.dueDate)
+                            {
+                                assignment.reason = " has had this assignment's due date pushed forward! (From " + oldAssignment.dueDate.ToShortDateString() + " to " + newAssignment.dueDate.ToShortDateString() + ")";
+                            }
+                            break;
+                    }
+                }
+            }
+            return assignment;
         }
     }
 }
