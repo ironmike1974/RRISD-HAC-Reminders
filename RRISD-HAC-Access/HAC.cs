@@ -152,7 +152,6 @@ namespace RRISD_HAC_Access
                     flag = true;
                 }
             }
-            Console.WriteLine(data.Substring(0, 1024));
             //end horrid part
             return ret;
         }
