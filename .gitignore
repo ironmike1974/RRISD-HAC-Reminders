@@ -7,7 +7,8 @@
 *.userosscache
 *.sln.docstates
 
-*.creds
+# Don't put secrets in source control
+appsettings.creds.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
