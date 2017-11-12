@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HacWeb.Models", "HacWeb.Mod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HacWeb.Lib", "HacWeb.Lib\HacWeb.Lib.csproj", "{BD90985E-86C6-40DA-B988-644D4D8D6CB7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HacWeb.Tests", "HacWeb.Tests\HacWeb.Tests.csproj", "{A0B4FC6B-DC6E-4242-B459-87EF0ACA1DBC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{BD90985E-86C6-40DA-B988-644D4D8D6CB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD90985E-86C6-40DA-B988-644D4D8D6CB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD90985E-86C6-40DA-B988-644D4D8D6CB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0B4FC6B-DC6E-4242-B459-87EF0ACA1DBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0B4FC6B-DC6E-4242-B459-87EF0ACA1DBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0B4FC6B-DC6E-4242-B459-87EF0ACA1DBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0B4FC6B-DC6E-4242-B459-87EF0ACA1DBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

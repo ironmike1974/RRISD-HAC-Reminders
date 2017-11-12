@@ -1,11 +1,35 @@
-﻿using System;
+﻿using HacWeb.Models;
+using Microsoft.Extensions.Options;
+using System;
 using System.IO;
 using System.Net;
+using System.Collections.Generic;
 
 namespace HacWeb.Lib
 {
-    public class HAC
+    public class HAC : IHAC
     {
+        private string _loginUri;
+        private Students _students;
+
+        public HAC(
+            IOptions<HacInterfaceUris> uriOptions,
+            IOptions<Students> studentList)
+        {
+            _loginUri = uriOptions.Value.Login;
+            _students = studentList.Value;
+        }
+
+        public List<Course> GetCurrentCourseStatus(string studentId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Students GetStudents()
+        {
+            return _students;
+        }
+
         private CookieContainer Login(string userName, string password, string loginUrl)
         {
             var container = new CookieContainer();

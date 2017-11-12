@@ -6,19 +6,17 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using HacWeb.Models;
 using Microsoft.Extensions.Options;
+using HacWeb.Lib;
 
 namespace HacWeb.Controllers
 {
     public class HomeController : Controller
     {
-        private string loginUri;
-        private Students _students;
+        private readonly IHAC _hacLib;
 
-        public HomeController(IOptions<HacInterfaceUris> uriOptions,
-            IOptions<Students> studentList)
+        public HomeController(IHAC hac)
         {
-            loginUri = uriOptions.Value.Login;
-            _students = studentList.Value;
+            _hacLib = hac;
         }
 
         public IActionResult Index()

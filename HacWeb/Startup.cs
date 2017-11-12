@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using HacWeb.Models;
+using HacWeb.Lib;
 
 namespace HacWeb
 {
@@ -24,6 +25,9 @@ namespace HacWeb
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            // Dependency Injection
+            services.AddSingleton<IHAC, HAC>();
 
             // Configuration
             services.Configure<HacInterfaceUris>(Configuration.GetSection("HacInterfaceUris"));

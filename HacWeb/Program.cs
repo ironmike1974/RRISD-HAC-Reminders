@@ -46,5 +46,25 @@ namespace HacWeb
                     }
                 })
                 .Build();
+
+        // Sample cred json file:
+        //       {
+        //    "HacInterfaceUris": {
+        //        "Login": "https://hac.friscoisd.org/HomeAccess/Account/LogOn?ReturnUrl=%2fHomeAccess%2f"
+        //    },
+        //    "Students": [
+        //        {
+        //            "DisplayName": "AJ",
+        //            "UserName": "ajuser",
+        //            "Password": "secretPassword"
+        //        },
+        //        {
+        //            "DisplayName": "PJ",
+        //            "UserName": "pjuser",
+        //            "Password": "secretPassword12312312git"
+        //        }
+        //    ]
+        //}
+
     }
 }
